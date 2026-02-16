@@ -18,8 +18,8 @@ pipeline {
             steps {
                 dir('backend_bootstrap') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        bat 'terraform init'
-                        bat 'terraform apply -auto-approve'
+                        sh 'terraform init'
+                        sh 'terraform apply -auto-approve'
                     }
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        bat 'terraform init -reconfigure'
+                        sh 'terraform init -reconfigure'
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        bat 'terraform plan -out=tfplan'
+                        sh 'terraform plan -out=tfplan'
                     }
                 }
             }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        bat 'terraform apply -auto-approve tfplan'
+                        sh 'terraform apply -auto-approve tfplan'
                     }
                 }
             }
@@ -66,7 +66,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        bat 'terraform destroy -auto-approve'
+                        sh 'terraform destroy -auto-approve'
                     }
                 }
             }

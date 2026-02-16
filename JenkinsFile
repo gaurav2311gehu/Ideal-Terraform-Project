@@ -4,54 +4,70 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'eu-north-1'
     }
+
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url : 'https://github.com/gaurav2311gehu/Ideal-Terraform-Project.git'
+                    url: 'https://github.com/gaurav2311gehu/Ideal-Terraform-Project.git'
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Bootstrap Backend') {
             steps {
                 dir('backend_bootstrap') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform init'
-                        sh 'terraform apply -auto-approve'
+                        bat 'terraform init'
+                        bat 'terraform apply -auto-approve'
                     }
                 }
             }
         }
-        stage('Main infra init') {
+
+        stage('Main Infra Init') {
             steps {
                 dir('main-infra') {
-                    sh 'terraform init -input=false'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        bat 'terraform init -reconfigure'
+                    }
                 }
             }
         }
+
         stage('Plan') {
             steps {
                 dir('main-infra') {
-                    sh 'terraform plan -out-tfplan'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        bat 'terraform plan -out=tfplan'
+                    }
                 }
             }
         }
+
         stage('Apply') {
             steps {
                 dir('main-infra') {
-                    sh 'terraform apply -auto-approve tfplan'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        bat 'terraform apply -auto-approve tfplan'
+                    }
                 }
             }
         }
+
         stage('Wait 10 Minutes') {
             steps {
+                echo "Infrastructure live for testing..."
                 sleep time: 10, unit: 'MINUTES'
             }
         }
-        stage('Destroy') {
+
+        stage('Destroy Infrastructure') {
             steps {
                 dir('main-infra') {
-                    sh 'terraform destroy -auto-approve'
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        bat 'terraform destroy -auto-approve'
+                    }
                 }
             }
         }

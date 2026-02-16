@@ -18,8 +18,8 @@ pipeline {
                 dir('backend_bootstrap') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                         // Initialize and apply backend (S3 + DynamoDB)
-                        sh '/usr/bin/terraform init'
-                        sh '/usr/bin/terraform apply -auto-approve'
+                        sh '/usr/local/bin/terraform init'
+                        sh '/usr/local/bin/terraform apply -auto-approve'
                     }
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh '/usr/bin/terraform init -reconfigure'
+                        sh '/usr/local/bin/terraform init -reconfigure'
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh '/usr/bin/terraform plan -out=tfplan'
+                        sh '/usr/local/bin/terraform plan -out=tfplan'
                     }
                 }
             }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh '/usr/bin/terraform apply -auto-approve tfplan'
+                        sh '/usr/local/bin/terraform apply -auto-approve tfplan'
                     }
                 }
             }
@@ -67,7 +67,7 @@ pipeline {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                         // Only destroy main infrastructure; backend remains
-                        sh '/usr/bin/terraform destroy -auto-approve'
+                        sh '/usr/local/bin/terraform destroy -auto-approve'
                     }
                 }
             }
@@ -79,7 +79,7 @@ pipeline {
             steps {
                 dir('backend_bootstrap') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh '/usr/bin/terraform destroy -auto-approve'
+                        sh '/usr/local/bin/terraform destroy -auto-approve'
                     }
                 }
             }

@@ -62,7 +62,7 @@ pipeline {
             }
         }
 
-        stage('Destroy Infrastructure') {
+        stage('Destroy All Infrastructure') {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {

@@ -6,7 +6,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout GitHub Code') {
             steps {
                 git branch: 'main',
@@ -18,8 +17,9 @@ pipeline {
             steps {
                 dir('backend_bootstrap') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform init'
-                        sh 'terraform apply -auto-approve'
+                        // Initialize and apply backend (S3 + DynamoDB)
+                        sh '/usr/bin/terraform init'
+                        sh '/usr/bin/terraform apply -auto-approve'
                     }
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform init -reconfigure'
+                        sh '/usr/bin/terraform init -reconfigure'
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform plan -out=tfplan'
+                        sh '/usr/bin/terraform plan -out=tfplan'
                     }
                 }
             }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform apply -auto-approve tfplan'
+                        sh '/usr/bin/terraform apply -auto-approve tfplan'
                     }
                 }
             }
@@ -57,16 +57,29 @@ pipeline {
 
         stage('Wait 10 Minutes') {
             steps {
-                echo "Infrastructure live for testing..."
+                echo 'Infrastructure live for testing...'
                 sleep time: 10, unit: 'MINUTES'
             }
         }
 
-        stage('Destroy All Infrastructure') {
+        stage('Destroy Main Infrastructure') {
             steps {
                 dir('main-infra') {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh 'terraform destroy -auto-approve'
+                        // Only destroy main infrastructure; backend remains
+                        sh '/usr/bin/terraform destroy -auto-approve'
+                    }
+                }
+            }
+        }
+
+        // Optional: Destroy backend (S3 + DynamoDB) for full cleanup
+        // WARNING: Only enable for practice environments
+        stage('Destroy Backend (Optional)') {
+            steps {
+                dir('backend_bootstrap') {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        sh '/usr/bin/terraform destroy -auto-approve'
                     }
                 }
             }

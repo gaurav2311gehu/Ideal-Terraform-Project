@@ -73,7 +73,7 @@ pipeline {
             }
         }
 
-        // Optional: Destroy backend (S3 + DynamoDB) for full cleanup
+        // Optional: Destroy backend (S3 + DynamoDB) for cleanup
         // WARNING: Only enable for practice environments
         stage('Destroy Backend (Optional)') {
             steps {

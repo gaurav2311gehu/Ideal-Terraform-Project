@@ -7,7 +7,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout GitHub Code') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/gaurav2311gehu/Ideal-Terraform-Project.git'
